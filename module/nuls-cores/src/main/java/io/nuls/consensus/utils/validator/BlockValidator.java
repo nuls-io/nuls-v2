@@ -73,10 +73,6 @@ public class BlockValidator {
             chain.getLogger().error("There is a big difference between the block time and the actual time!");
             throw new NulsException(ConsensusErrorCode.ERROR_UNLOCK_TIME);
         }
-        chain.getLogger().info("{} - {}", blockHeader.getHeight(), blockHeader.getHash().toHex());
-        if (blockHeader.getHeight() > ConsensusConstant.HATE_HEIGHT1 && blockHeader.getHeight() < ConsensusConstant.HATE_HEIGHT2) {
-            return;
-        }
         RoundValidResult roundValidResult;
         String blockHeaderHash = blockHeader.getHash().toHex();
         try {
@@ -460,9 +456,6 @@ public class BlockValidator {
             txCoinData.getTo().sort(toComparator);
             if (!Arrays.equals(coinData.serialize(), txCoinData.serialize())) {
                 chain.getLogger().error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - height:{}, - redPunish tx timestamp:{}", punishData.getReasonCode(), tx.getBlockHeight(), tx.getTime());
-//                if (tx.getBlockHeight() < 19144000 && coinData.getTo().size() == 1 && txCoinData.getTo().size() > 1) {
-//                    return true;
-//                }
                 return false;
             }
         } catch (IOException e) {
