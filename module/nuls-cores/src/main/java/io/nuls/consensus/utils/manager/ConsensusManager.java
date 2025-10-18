@@ -59,7 +59,7 @@ public class ConsensusManager {
      */
     public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round, BlockExtendsData extendsData) throws Exception {
         String stateRoot;
-        Transaction coinBaseTransaction = createCoinBaseTx(chain, self, txList, round, 0);
+        Transaction coinBaseTransaction = createCoinBaseTx(chain, self, txList, round, 0,bestBlock.getHeight()+1);
         if (AddressTool.validContractAddress(self.getAgent().getRewardAddress(), chain.getConfig().getChainId())) {
             stateRoot = CallMethodUtils.triggerContract(chain.getConfig().getChainId(), RPCUtil.encode(extendsData.getStateRoot()), bestBlock.getHeight(), AddressTool.getStringAddressByBytes(self.getAgent().getRewardAddress()), RPCUtil.encode(coinBaseTransaction.serialize()));
             extendsData.setStateRoot(RPCUtil.decode(stateRoot));
@@ -84,14 +84,14 @@ public class ConsensusManager {
      * @param unlockHeight Unlocking height/unlock height
      * @return Transaction
      */
-    public Transaction createCoinBaseTx(Chain chain, MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) throws IOException, NulsException {
+    public Transaction createCoinBaseTx(Chain chain, MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight,long nowHeight) throws IOException, NulsException {
         Transaction tx = new Transaction(TxType.COIN_BASE);
         CoinData coinData = new CoinData();
         /*
         Calculate consensus rewards
         Calculating consensus Awards
         */
-        List<CoinTo> rewardList = calcReward(chain, txList, member, localRound, unlockHeight);
+        List<CoinTo> rewardList = calcReward(chain, txList, member, localRound, unlockHeight,nowHeight);
         for (CoinTo coin : rewardList) {
             coinData.addTo(coin);
         }
@@ -100,7 +100,7 @@ public class ConsensusManager {
         } catch (Exception e) {
             chain.getLogger().error(e);
             coinData = new CoinData();
-            rewardList = calcReward(chain, new ArrayList<>(), member, localRound, unlockHeight);
+            rewardList = calcReward(chain, new ArrayList<>(), member, localRound, unlockHeight,nowHeight);
             for (CoinTo coin : rewardList) {
                 coinData.addTo(coin);
             }
@@ -122,7 +122,7 @@ public class ConsensusManager {
      * @param unlockHeight Unlocking height/unlock height
      * @return List<CoinTo>
      */
-    private List<CoinTo> calcReward(Chain chain, List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException {
+    private List<CoinTo> calcReward(Chain chain, List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight,long nowHeight) throws NulsException {
         int chainId = chain.getConfig().getChainId();
         /*
         Asset and consensus reward key value pairs
@@ -205,7 +205,7 @@ public class ConsensusManager {
         Chain reward list
         Chain reward list
         */
-        return getRewardCoin(self, localRound, unlockHeight, awardAssetMap, chain);
+        return getRewardCoin(self, localRound, unlockHeight, awardAssetMap, chain,nowHeight);
     }
 
 
@@ -421,7 +421,7 @@ public class ConsensusManager {
      * @return Cross chain transaction distribution set
      */
     @SuppressWarnings("unchecked")
-    private List<CoinTo> getRewardCoin(MeetingMember self, MeetingRound localRound, long unlockHeight, Map<String, BigInteger> awardAssetMap, Chain chain) throws NulsException {
+    private List<CoinTo> getRewardCoin(MeetingMember self, MeetingRound localRound, long unlockHeight, Map<String, BigInteger> awardAssetMap, Chain chain,long nowHeight) throws NulsException {
         Map<String, Object> param = new HashMap<>(4);
 
         RoundInfo roundInfo = new RoundInfo(localRound.getTotalWeight(), localRound.getStartTime(), localRound.getEndTime(), localRound.getMemberCount());
@@ -439,6 +439,7 @@ public class ConsensusManager {
         param.put(ParamConstant.ROUND_INFO, roundInfo);
         param.put(ParamConstant.AGENT_INFO, agentInfo);
         param.put(ParamConstant.AWARD_ASSERT_MAP, awardAssetMap);
+        param.put("nowHeight",nowHeight);
 
         Result result = economicService.calcReward(param);
         if (result.isFailed()) {
