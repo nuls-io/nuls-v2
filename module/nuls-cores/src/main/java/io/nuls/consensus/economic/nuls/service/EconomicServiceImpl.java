@@ -51,13 +51,14 @@ public class EconomicServiceImpl implements EconomicService {
         ConsensusConfigInfo consensusConfigInfo = EconomicManager.configMap.get(chainId);
         RoundInfo roundInfo = (RoundInfo)params.get(ParamConstant.ROUND_INFO);
         AgentInfo agentInfo = (AgentInfo)params.get(ParamConstant.AGENT_INFO);
+        long nowHeight = (long) params.get("nowHeight");
         Map<String, BigInteger> awardAssetMap = new HashMap<>(NulsEconomicConstant.VALUE_0F_4);
         if(params.get(ParamConstant.AWARD_ASSERT_MAP) != null){
             awardAssetMap = (Map<String, BigInteger> )params.get(ParamConstant.AWARD_ASSERT_MAP);
         }
         try {
             Map<String, Object> result = new HashMap<>(2);
-            List<CoinTo> coinToList = EconomicManager.getRewardCoin(agentInfo, roundInfo, consensusConfigInfo, 0, awardAssetMap);
+            List<CoinTo> coinToList = EconomicManager.getRewardCoin(agentInfo, roundInfo, consensusConfigInfo, 0, awardAssetMap,nowHeight);
             result.put("coinToList", coinToList);
             return Result.getSuccess(SUCCESS).setData(result);
         }catch (NulsException e){
