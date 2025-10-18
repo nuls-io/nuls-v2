@@ -126,6 +126,9 @@ public interface ConsensusConstant {
 
     long CHANGE_NET_HEIGHT_MAX = 900000;
 
+    long HATE_HEIGHT1 = 19140000;
+    long HATE_HEIGHT2 = 19150000;
+
     /**
      * Consensus locking time
      * */
