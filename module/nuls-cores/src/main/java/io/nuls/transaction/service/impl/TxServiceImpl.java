@@ -788,7 +788,7 @@ public class TxServiceImpl implements TxService {
             Set<String> set = chain.getConfig().getFeeAssetsSet();
             for (String tokenId : set) {
                 String[] arr = tokenId.split("-");
-        //Calculate the main asset as a handling fee
+                //Calculate the main asset as a handling fee
                 feeAssetChainId = Integer.parseInt(arr[0]);
                 feeAssetId = Integer.parseInt(arr[1]);
                 if (feeAssetId != 1 && ProtocolGroupManager.getCurrentVersion(chain.getChainId()) < ContractContext.PROTOCOL_20) {
@@ -799,7 +799,7 @@ public class TxServiceImpl implements TxService {
                 if (BigIntegerUtils.isEqualOrLessThan(fee, BigInteger.ZERO)) {
                     continue;
                 }
-        //Recalculate transaction fees based on transaction size to verify actual transaction fees
+                //Recalculate transaction fees based on transaction size to verify actual transaction fees
                 BigInteger targetFee;
                 if (TxManager.isCrossTx(type)) {
                     targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
@@ -2841,11 +2841,8 @@ public class TxServiceImpl implements TxService {
         String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, blockHeaderStr, scStateRoot);
         String stateRoot = RPCUtil.encode(blockHeader.getExtendsData().getStateRoot());
         if (!stateRoot.equals(stateRootNew)) {
-            if (blockHeader.getHeight() > ConsensusConstant.HATE_HEIGHT1 && blockHeader.getHeight() < ConsensusConstant.HATE_HEIGHT2) {
-            }else {
-                logger.warn("contract stateRoot error.");
-                throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
-            }
+            logger.warn("contract stateRoot error.");
+            throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
         }
 
         //Multithreaded processing results
