@@ -362,7 +362,7 @@ public class BlockValidator {
             chain.getLogger().error("CoinBase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
             return false;
         }
-        Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain, member, block.getTxs(), currentRound, 0);
+        Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain, member, block.getTxs(), currentRound, 0,block.getHeader().getHeight());
         if (null == coinBaseTransaction) {
             chain.getLogger().error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + blockHeaderHash);
             return false;
