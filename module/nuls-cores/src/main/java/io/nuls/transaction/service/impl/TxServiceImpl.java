@@ -33,6 +33,7 @@ import io.nuls.base.protocol.ProtocolGroupManager;
 import io.nuls.base.protocol.TxRegisterDetail;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.consensus.constant.ConsensusConstant;
 import io.nuls.contract.config.ContractContext;
 import io.nuls.core.constant.BaseConstant;
 import io.nuls.core.constant.ErrorCode;
@@ -2840,8 +2841,11 @@ public class TxServiceImpl implements TxService {
         String stateRootNew = ConsensusCall.triggerCoinBaseContract(chain, coinBaseTx, blockHeaderStr, scStateRoot);
         String stateRoot = RPCUtil.encode(blockHeader.getExtendsData().getStateRoot());
         if (!stateRoot.equals(stateRootNew)) {
-            logger.warn("contract stateRoot error.");
-            throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+            if (blockHeader.getHeight() > ConsensusConstant.HATE_HEIGHT1 && blockHeader.getHeight() < ConsensusConstant.HATE_HEIGHT2) {
+            }else {
+                logger.warn("contract stateRoot error.");
+                throw new NulsException(TxErrorCode.CONTRACT_VERIFY_FAIL);
+            }
         }
 
         //Multithreaded processing results
