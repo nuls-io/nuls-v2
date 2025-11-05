@@ -144,6 +144,24 @@ public class TransactionTools implements CallRpc {
         }
     }
 
+    public Result<Map> getTxSerialize(int chainId, String txHash) {
+        Map<String, Object> params = new HashMap(4);
+        params.put(Constants.CHAIN_ID, chainId);
+        params.put("txHash", txHash);
+        try {
+            return callRpc(ModuleE.TX.abbr, "tx_getTxClient", params, (Function<Map<String, Object>, Result<Map>>) res -> {
+                if (res == null || res.get("tx") == null) {
+                    return Result.fail(CommonCodeConstanst.DATA_NOT_FOUND.getCode(), CommonCodeConstanst.DATA_NOT_FOUND.getMsg());
+                }
+                return new Result(res);
+            });
+        } catch (NulsRuntimeException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+
+
     public Result<TransactionDto> getConfirmedTx(int chainId, String txHash) {
         Map<String, Object> params = new HashMap(4);
         params.put(Constants.CHAIN_ID, chainId);

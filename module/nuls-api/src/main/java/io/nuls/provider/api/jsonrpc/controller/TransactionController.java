@@ -171,6 +171,41 @@ public class TransactionController {
         return ResultUtil.getJsonRpcResult(result);
     }
 
+    @RpcMethod("getTxSerialization")
+    @ApiOperation(description = "according tohashGet transaction serialization data", order = 301)
+    @Parameters({
+            @Parameter(parameterName = "chainId", requestType = @TypeDescriptor(value = int.class), parameterDes = "chainid"),
+            @Parameter(parameterName = "hash", parameterDes = "transactionhash")
+    })
+    @ResponseData(name = "Return value", responseType = @TypeDescriptor(value = Map.class, mapKeys = {
+            @Key(name = "value", description = "txhex")
+    }))
+    public RpcResult getTxSerialization(List<Object> params) {
+        VerifyUtils.verifyParams(params, 2);
+        int chainId;
+        String txHash;
+        try {
+            chainId = (int) params.get(0);
+        } catch (Exception e) {
+            return RpcResult.paramError("[chainId] is inValid");
+        }
+        try {
+            txHash = (String) params.get(1);
+        } catch (Exception e) {
+            return RpcResult.paramError("[txHash] is inValid");
+        }
+        if (!Context.isChainExist(chainId)) {
+            return RpcResult.dataNotFound();
+        }
+        if (StringUtils.isBlank(txHash) || !ValidateUtil.validHash(txHash)) {
+            return RpcResult.paramError("[txHash] is inValid");
+        }
+
+        Result<Map> result = transactionTools.getTxSerialize(chainId, txHash);
+        return ResultUtil.getJsonRpcResult(result);
+    }
+
+
     @RpcMethod("validateTx")
     @ApiOperation(description = "Verify transactions", order = 302, detailDesc = "Verify transactions for offline assembly,Successful verification returns transactionhashvalue,Failure returns error message")
     @Parameters({
