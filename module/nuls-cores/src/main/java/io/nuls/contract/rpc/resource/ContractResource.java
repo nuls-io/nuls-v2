@@ -631,20 +631,25 @@ public class ContractResource extends BaseCmd {
                 List multyAssetValuesList = (List) params.get("multyAssetValues");
                 Object[] multyAssetValues = multyAssetValuesList != null ? multyAssetValuesList.toArray() : null;
                 if (value.compareTo(BigInteger.ZERO) < 0) {
+                    errorMsg = "negative value";
                     break;
                 }
                 if (!AddressTool.validAddress(chainId, sender)) {
+                    errorMsg = "invalid sender address";
                     break;
                 }
                 if (!AddressTool.validAddress(chainId, contractAddress)) {
+                    errorMsg = "invalid sender contractAddress";
                     break;
                 }
                 if (StringUtils.isBlank(methodName)) {
+                    errorMsg = "empty methodName";
                     break;
                 }
                 byte[] senderBytes = AddressTool.getAddress(sender);
                 byte[] contractAddressBytes = AddressTool.getAddress(contractAddress);
                 if (!ContractLedgerUtil.isExistContractAddress(chainId, contractAddressBytes)) {
+                    errorMsg = "not exist contractAddress";
                     break;
                 }
                 BlockHeader blockHeader = BlockCall.getLatestBlockHeader(chainId);

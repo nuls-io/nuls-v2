@@ -352,6 +352,13 @@ public class ContractMultyAssetTest extends BaseQuery {
     }
 
     @Test
+    public void sendPayableTest() throws Exception {
+        this.contractAddress = "tNULSeBaN5Nk4Y3n6HUdVZTS8efV3JrcGujZMS";
+        // Transfer in
+        this.callByParams("_payable", "6.6", null);
+    }
+
+    @Test
     public void pocmDepositMultyAssetTest() throws Exception {
         sender = toAddress0;
         // Transfer in

@@ -37,6 +37,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.common.ConfigBean;
 import io.nuls.contract.base.Base;
+import io.nuls.contract.mock.basetest.ContractTest;
 import io.nuls.contract.model.bo.Chain;
 import io.nuls.contract.model.dto.ContractTransactionDto;
 import io.nuls.contract.rpc.call.BlockCall;
@@ -56,17 +57,20 @@ import io.nuls.core.rpc.info.NoUse;
 import io.nuls.core.rpc.model.ModuleE;
 import io.nuls.core.rpc.model.message.Response;
 import io.nuls.core.rpc.netty.processor.ResponseMessageProcessor;
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
-import static io.nuls.contract.constant.ContractCmdConstant.ACCOUNT_CONTRACTS;
-import static io.nuls.contract.constant.ContractCmdConstant.CONTRACT_INFO;
+import static io.nuls.contract.constant.ContractCmdConstant.*;
+import static io.nuls.contract.constant.ContractCmdConstant.CREATE;
 
 /**
  * @author: PierreLuo
@@ -125,6 +129,24 @@ public class BaseQuery extends Base {
         importPriKey("5633c9e3923773a5665c4e8cf5f8e80abb7085f9b30694656dfc1c9f3b7092d2", password);//33 tNULSeBaMfCD8hK8inyEKDBZpuuBUjLdiKgwnG
         importPriKey("b936b61041b6fc84943b46dc0bc8ed79c009fdeb607fce17113800b64a726f0c", password);//34 tNULSeBaMvQr8dVnk3f3DPvwCYX3ctTRtrTurD
 
+    }
+
+    @Test
+    public void createContract() throws Exception {
+        //sender = toAddress32;
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/MultiCallNuls/target/MultiCallNuls-1.0-SNAPSHOT.jar");
+        byte[] contractCode = IOUtils.toByteArray(in);
+        Object[] args = new Object[]{};
+        String remark = "create contract test";
+        Map params = this.makeCreateParams("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", contractCode, "aliaser", remark, args);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        String contractAddress = (String) result.get("contractAddress");
+        Map map = waitGetContractTx(hash);
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map)(map.get("contractResult"))).get("success"));
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(map));
     }
 
     /**
@@ -200,7 +222,7 @@ public class BaseQuery extends Base {
     @Test
     public void transferOne() {
         String from = "tNULSeBaMtkzQ1tH8JWBGZDCmRHCmySevE4frM";
-        String to = "tNULSeBaNRJrWyAfNtA6aiAozaJdemWA5WbBFU";
+        String to = "tNULSeBaMmDk9iDy84ZspfevAf9TPmXdbaQt3p";
         TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(chain.getChainId(), chain.getConfig().getAssetId())
                 .addForm(from, password, new BigDecimal("100.001").movePointRight(8).toBigInteger())
                 .addTo(to, new BigDecimal("100").movePointRight(8).toBigInteger());
@@ -209,46 +231,59 @@ public class BaseQuery extends Base {
 
     @Test
     public void transferMultyAsset() {
-        TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(2, 3)
-                .addForm(sender, password, BigInteger.valueOf(39_1000_0000_0000L))
-                .addTo(toAddress, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress0, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress1, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress2, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress3, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress4, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress5, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress6, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress7, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress8, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress9, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress10, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress11, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress12, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress13, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress14, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress15, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress16, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress17, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress18, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress19, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress20, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress21, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress22, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress23, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress24, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress25, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress26, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress27, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress28, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress29, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress30, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress31, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress32, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress33, BigInteger.valueOf(1000000000000L))
-                .addTo(toAddress34, BigInteger.valueOf(1000000000000L))
-                .addTo("tNULSeBaMrNuXBLLUS1zJSERqbf3jm5c633fiS", BigInteger.valueOf(3_1000_0000_0000L));
-        System.out.println(transferService.transfer(builder.build(new TransferReq())).getData());
+        int decimals = 8;
+        BigInteger value = new BigDecimal("100").movePointRight(decimals).toBigInteger();
+        sender = toAddress;
+        TransferReq.TransferReqBuilder builder = new TransferReq.TransferReqBuilder(2, 1)
+                .addForm(sender, password, new BigDecimal("0.001").movePointRight(decimals).toBigInteger())
+                .addTo(toAddress0,  value)
+                .addTo(toAddress1,  value)
+                .addTo(toAddress2,  value)
+                .addTo(toAddress3,  value)
+                .addTo(toAddress4,  value)
+                .addTo(toAddress5,  value)
+                .addTo(toAddress6,  value)
+                .addTo(toAddress7,  value)
+                .addTo(toAddress8,  value)
+                .addTo(toAddress9,  value)
+                .addTo(toAddress10, value)
+                .addTo(toAddress11, value)
+                .addTo(toAddress12, value)
+                .addTo(toAddress13, value)
+                .addTo(toAddress14, value)
+                .addTo(toAddress15, value)
+                .addTo(toAddress16, value)
+                .addTo(toAddress17, value)
+                .addTo(toAddress18, value)
+                .addTo(toAddress19, value)
+                .addTo(toAddress20, value)
+                .addTo(toAddress21, value)
+                .addTo(toAddress22, value)
+                .addTo(toAddress23, value)
+                .addTo(toAddress24, value)
+                .addTo(toAddress25, value)
+                .addTo(toAddress26, value)
+                .addTo(toAddress27, value)
+                .addTo(toAddress28, value)
+                .addTo(toAddress29, value)
+                .addTo(toAddress30, value)
+                .addTo(toAddress31, value)
+                .addTo(toAddress32, value)
+                .addTo(toAddress33, value)
+                .addTo(toAddress34, value)
+                .addTo("tNULSeBaMrNuXBLLUS1zJSERqbf3jm5c633fiS", value)
+                .addTo("tNULSeBaMmDk9iDy84ZspfevAf9TPmXdbaQt3p", value)
+                .addTo("tNULSeBaMujZZNA6NkqLDATQDbbKtvmZCpyAeA", value)
+                .addTo("tNULSeBaMmtrCP3UQN3wpUi7FDRnGWLbyJF6hi", value);
+        TransferReq transferReq = builder.build(new TransferReq());
+        BigInteger a = BigInteger.ZERO;
+        for (TransferReq.Item item : transferReq.getOutputs()) {
+            a = a.add(item.getAmount());
+        }
+        TransferReq.Item from = transferReq.getInputs().get(0);
+        from.setAmount(from.getAmount().add(a));
+
+        System.out.println(transferService.transfer(transferReq).getData());
     }
 
     protected boolean syncKernel = true;
@@ -376,7 +411,7 @@ public class BaseQuery extends Base {
      */
     @Test
     public void contractResult() throws Exception {
-        Object[] objects = getContractResult("a92f2928b6c3ee3944a8e0c7e895f4185fb1b9991f82ca5dac1efe82a6adadec");
+        Object[] objects = getContractResult("43fbd8a724e63aa63301f11b7098aa5c66eda9b10ad6b52b63123a2bb1269205");
         Log.info("contractResult-result:{}", JSONUtils.obj2PrettyJson(objects[0]));
         Assert.assertTrue(null != objects[1]);
     }

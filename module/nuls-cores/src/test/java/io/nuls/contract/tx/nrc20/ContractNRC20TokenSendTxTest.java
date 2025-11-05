@@ -62,14 +62,56 @@ public class ContractNRC20TokenSendTxTest extends BaseQuery {
     @Test
     public void createContract() throws Exception {
         //sender = toAddress32;
-        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract/cross-locked-nrc20").getFile());
+        InputStream in = new FileInputStream(ContractTest.class.getResource("/contract/nrc20").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String remark = "create contract test";
-        String name = "DDD";
-        String symbol = "DDD";
+        String name = "USD18";
+        String symbol = "USD18";
         String amount = "100000000";
-        String decimals = "8";
+        String decimals = "18";
         Map params = this.makeCreateParams("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", contractCode, "aliaser", remark, name, symbol, amount, decimals);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        String contractAddress = (String) result.get("contractAddress");
+        Map map = waitGetContractTx(hash);
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map)(map.get("contractResult"))).get("success"));
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(map));
+    }
+
+    @Test
+    public void createMinterContract() throws Exception {
+        //sender = toAddress32;
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/NerveMultiSigWalletNULS/NRC20Minter/target/NRC20Minter-1.0-SNAPSHOT.jar");
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String remark = "create contract test";
+        String name = "NVT";
+        String symbol = "NVT";
+        String decimals = "8";
+        String minter = "tNULSeBaN5Nk4Y3n6HUdVZTS8efV3JrcGujZMS";
+        Map params = this.makeCreateParams("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", contractCode, "aliaser", remark, name, symbol, decimals, minter);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
+        assertTrue(cmdResp2, result);
+        String hash = (String) result.get("txHash");
+        String contractAddress = (String) result.get("contractAddress");
+        Map map = waitGetContractTx(hash);
+        Assert.assertTrue(JSONUtils.obj2PrettyJson(map), (Boolean) ((Map)(map.get("contractResult"))).get("success"));
+        Log.info("contractResult:{}", JSONUtils.obj2PrettyJson(map));
+    }
+
+    @Test
+    public void createNerveMultiContract() throws Exception {
+        //sender = toAddress32;
+        InputStream in = new FileInputStream("/Users/pierreluo/IdeaProjects/NerveMultiSigWalletNULS/NerveMultiSigWallet/target/NerveMultiSigWallet-1.0-SNAPSHOT.jar");
+        byte[] contractCode = IOUtils.toByteArray(in);
+        String remark = "create contract test";
+        Object[] args = new Object[]{
+                2,
+                new String[]{"tNULSeBaMmDk9iDy84ZspfevAf9TPmXdbaQt3p", "tNULSeBaMmtrCP3UQN3wpUi7FDRnGWLbyJF6hi", "tNULSeBaMujZZNA6NkqLDATQDbbKtvmZCpyAeA"}
+        };
+        Map params = this.makeCreateParams("tNULSeBaMnrs6JKrCy6TQdzYJZkMZJDng7QAsD", contractCode, "aliaser", remark, args);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, CREATE, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(CREATE));
         assertTrue(cmdResp2, result);

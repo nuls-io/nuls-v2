@@ -62,9 +62,9 @@ public class ContractNRC20TokenQueryTest extends BaseQuery {
         InputStream in = new FileInputStream(ContractTest.class.getResource("/nrc20").getFile());
         byte[] contractCode = IOUtils.toByteArray(in);
         String name = "KQB";
-        String symbol = "KongQiBi";
+        String symbol = "KQB";
         String amount = BigDecimal.TEN.pow(10).toPlainString();
-        String decimals = "2";
+        String decimals = "18";
         Map params = this.makeImputedCreateGasParams(sender, contractCode, name, symbol, amount, decimals);
         Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.SC.abbr, IMPUTED_CREATE_GAS, params);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get(IMPUTED_CREATE_GAS));
