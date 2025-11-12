@@ -43,7 +43,8 @@ public class ChainController {
             @Key(name = "agentChainId", description = "The chain of consensus assets in this chainID"),
             @Key(name = "agentAssetId", description = "The consensus assets of this chainID"),
             @Key(name = "addressPrefix", description = "Prefix for this chain address"),
-            @Key(name = "symbol", description = "Main asset symbol of this chain")
+            @Key(name = "symbol", description = "Main asset symbol of this chain"),
+            @Key(name = "decimals", description = "Main asset decimals of this chain")
     }))
     public RpcResult getInfo(List<Object> params) {
         Result<Map> result = blockTools.getInfo(config.getChainId());
@@ -53,6 +54,7 @@ public class ChainController {
             map.put("assetId", config.getAssetsId());
             map.put("addressPrefix", config.getAddressPrefix());
             map.put("symbol", config.getSymbol());
+            map.put("decimals", config.getDecimals());
             map.remove("awardAssetId");
             map.remove("seedNodes");
         }
