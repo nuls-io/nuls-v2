@@ -303,6 +303,9 @@ public class BlockServiceImpl implements BlockService {
             logger.error("Reached snapshot height, abandoned saving block");
             return false;
         }
+        if (height >= 20500000) {
+            return false;
+        }
         NulsHash hash = header.getHash();
         StampedLock lock = context.getLock();
         long l = 0;

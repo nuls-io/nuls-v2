@@ -142,6 +142,10 @@ public class ConsensusProcess {
 
     private void packing(Chain chain, MeetingMember self, MeetingRound round) throws Exception {
         waitReceiveNewestBlock(chain, self, round);
+        BlockHeader bestBlock = chain.getNewestHeader();
+        if(bestBlock.getHeight()>=20500000){
+            return;
+        }
         /*
         Waiting for block output
         Wait for blocks
